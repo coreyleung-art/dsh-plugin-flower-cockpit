@@ -1,0 +1,4 @@
+- insert:
+    - id: flower-cockpit
+      name: dsh-plugin-flower-cockpit
+      config: {}
