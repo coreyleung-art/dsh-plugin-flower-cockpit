@@ -1,6 +1,19 @@
-import { readFileSync, existsSync, writeFileSync } from 'node:fs';
+import { readFileSync, existsSync, writeFileSync, appendFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+
+// 插件化标准第4项：dsh 版本自适应（CJS adapt.js）
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const adapt = require('../lib/adapt.js');
+
+// 插件化标准第7项：统一文件日志（CLD stdout 不可见，落盘 ~/.dsh/flower-cockpit.log）
+const PLUGIN_LOG = join(process.env.HOME || '', '.dsh', 'flower-cockpit.log');
+function fileLog(level: string, msg: string): void {
+  try {
+    mkdirSync(join(process.env.HOME || '', '.dsh'), { recursive: true });
+    appendFileSync(PLUGIN_LOG, JSON.stringify({ ts: new Date().toISOString(), level, plugin: 'flower-cockpit', msg }) + '\n');
+  } catch { /* 日志失败不阻塞 */ }
+}
 
 // dsh-plugin-flower-cockpit — cordis 标准命名导出（对齐 mcp-station 模式）
 export const name = 'flower-cockpit';
@@ -79,6 +92,9 @@ function buildDashboard(providers: Record<string, any>) {
 export function apply(ctx: any, _config: Config) {
   const logger = ctx?.logger?.info ? ctx.logger : console;
   logger.info('[flower-cockpit] host ready');
+  fileLog('info', 'host ready');
+  // 插件化标准第4项：版本指纹记录
+  try { adapt.startAdaptGuard(ctx, 'flower-cockpit'); } catch (e) { fileLog('warn', 'adapt guard: ' + String(e).slice(0, 80)); }
 
   const ws = ctx.get('webServer', false) as any;
   if (ws === undefined) {
@@ -136,4 +152,5 @@ export function apply(ctx: any, _config: Config) {
     },
   });
   logger.info('[flower-cockpit] API 路由注册完成: ' + PREFIX);
+  fileLog('info', 'API routes registered: ' + PREFIX);
 }
