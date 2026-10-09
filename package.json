@@ -2,6 +2,7 @@
   "name": "dsh-plugin-flower-cockpit",
   "description": "花店驾驶舱：可编辑经营周报 + 促销工作流 + 8 卡驾驶舱主页",
   "version": "0.2.0",
+  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "exports": {

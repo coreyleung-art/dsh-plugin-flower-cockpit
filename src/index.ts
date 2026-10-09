@@ -2,9 +2,11 @@ import { readFileSync, existsSync, writeFileSync, appendFileSync, mkdirSync } fr
 import { join } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-// 插件化标准第4项：dsh 版本自适应（CJS adapt.js）
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const adapt = require('../lib/adapt.js');
+// 插件化标准第4项：dsh 版本自适应
+// ★ 2026-10-09 迁移（最后变动人 session-b250bf9d · 授权 AUTH-20261009-dea67d017d9f）：
+//   原为 `const adapt = require('../lib/adapt.js')`（CJS）⇒ package.json 加 type:module 后
+//   ESM 下无 require ⇒ 改为静态 import（lib/adapt.js 同步转 ESM）。
+import * as adapt from '../lib/adapt.js';
 
 // 插件化标准第7项：统一文件日志（CLD stdout 不可见，落盘 ~/.dsh/flower-cockpit.log）
 const PLUGIN_LOG = join(process.env.HOME || '', '.dsh', 'flower-cockpit.log');
